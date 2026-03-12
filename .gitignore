@@ -1,0 +1,19 @@
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Compiled
+*.class
+*.jar
+
+# Maven
+target/
+bin/
+build/
+
+# OS
+.DS_Store
+
+
