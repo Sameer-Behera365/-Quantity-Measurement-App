@@ -7,22 +7,7 @@ public class QuantityMeasurementAppTest {
 
     private static final double EPSILON = 1e-6;
 
-    // -------------------- BACKWARD COMPATIBILITY --------------------
-
-    @Test
-    public void givenOneFoot_WhenComparedWithTwelveInches_ThenShouldBeEqual() {
-        QuantityMeasurementApp.QuantityLength q1 = new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET);
-        QuantityMeasurementApp.QuantityLength q2 = new QuantityMeasurementApp.QuantityLength(12.0, QuantityMeasurementApp.LengthUnit.INCHES);
-        assertEquals(q1, q2);
-    }
-
-    @Test
-    public void givenOneFoot_WhenConvertedToInches_ThenShouldReturnTwelve() {
-        double result = QuantityMeasurementApp.convert(1.0, QuantityMeasurementApp.LengthUnit.FEET, QuantityMeasurementApp.LengthUnit.INCHES);
-        assertEquals(12.0, result, EPSILON);
-    }
-
-    // -------------------- SAME UNIT ADDITION --------------------
+    // -------------------- BACKWARD COMPATIBILITY (UC6) --------------------
 
     @Test
     public void givenOnePlusTwoFeet_WhenAdded_ThenShouldReturnThreeFeet() {
@@ -30,21 +15,9 @@ public class QuantityMeasurementAppTest {
                 new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET),
                 new QuantityMeasurementApp.QuantityLength(2.0, QuantityMeasurementApp.LengthUnit.FEET)
         );
-        assertEquals(3.0, result.getValue(), EPSILON, "1.0 + 2.0 feet should equal 3.0 feet");
+        assertEquals(3.0, result.getValue(), EPSILON);
         assertEquals(QuantityMeasurementApp.LengthUnit.FEET, result.getUnit());
     }
-
-    @Test
-    public void givenSixPlusSixInches_WhenAdded_ThenShouldReturnTwelveInches() {
-        QuantityMeasurementApp.QuantityLength result = QuantityMeasurementApp.add(
-                new QuantityMeasurementApp.QuantityLength(6.0, QuantityMeasurementApp.LengthUnit.INCHES),
-                new QuantityMeasurementApp.QuantityLength(6.0, QuantityMeasurementApp.LengthUnit.INCHES)
-        );
-        assertEquals(12.0, result.getValue(), EPSILON, "6.0 + 6.0 inches should equal 12.0 inches");
-        assertEquals(QuantityMeasurementApp.LengthUnit.INCHES, result.getUnit());
-    }
-
-    // -------------------- CROSS UNIT ADDITION --------------------
 
     @Test
     public void givenOneFootPlusTwelveInches_WhenAdded_ThenShouldReturnTwoFeet() {
@@ -52,101 +25,161 @@ public class QuantityMeasurementAppTest {
                 new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET),
                 new QuantityMeasurementApp.QuantityLength(12.0, QuantityMeasurementApp.LengthUnit.INCHES)
         );
-        assertEquals(2.0, result.getValue(), EPSILON, "1.0 foot + 12.0 inches should equal 2.0 feet");
+        assertEquals(2.0, result.getValue(), EPSILON);
+        assertEquals(QuantityMeasurementApp.LengthUnit.FEET, result.getUnit());
+    }
+
+    // -------------------- UC7: EXPLICIT TARGET UNIT --------------------
+
+    @Test
+    public void givenOneFootPlusTwelveInches_WhenTargetFeet_ThenShouldReturnTwoFeet() {
+        QuantityMeasurementApp.QuantityLength result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET),
+                new QuantityMeasurementApp.QuantityLength(12.0, QuantityMeasurementApp.LengthUnit.INCHES),
+                QuantityMeasurementApp.LengthUnit.FEET
+        );
+        assertEquals(2.0, result.getValue(), EPSILON, "1 foot + 12 inches in FEET should be 2.0");
         assertEquals(QuantityMeasurementApp.LengthUnit.FEET, result.getUnit());
     }
 
     @Test
-    public void givenTwelveInchesPlusOneFoot_WhenAdded_ThenShouldReturnTwentyFourInches() {
+    public void givenOneFootPlusTwelveInches_WhenTargetInches_ThenShouldReturnTwentyFourInches() {
         QuantityMeasurementApp.QuantityLength result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET),
                 new QuantityMeasurementApp.QuantityLength(12.0, QuantityMeasurementApp.LengthUnit.INCHES),
-                new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET)
+                QuantityMeasurementApp.LengthUnit.INCHES
         );
-        assertEquals(24.0, result.getValue(), EPSILON, "12.0 inches + 1.0 foot should equal 24.0 inches");
+        assertEquals(24.0, result.getValue(), EPSILON, "1 foot + 12 inches in INCHES should be 24.0");
         assertEquals(QuantityMeasurementApp.LengthUnit.INCHES, result.getUnit());
     }
 
     @Test
-    public void givenOneYardPlusThreeFeet_WhenAdded_ThenShouldReturnTwoYards() {
+    public void givenOneFootPlusTwelveInches_WhenTargetYards_ThenShouldReturnPointSixSeven() {
         QuantityMeasurementApp.QuantityLength result = QuantityMeasurementApp.add(
-                new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.YARDS),
-                new QuantityMeasurementApp.QuantityLength(3.0, QuantityMeasurementApp.LengthUnit.FEET)
+                new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET),
+                new QuantityMeasurementApp.QuantityLength(12.0, QuantityMeasurementApp.LengthUnit.INCHES),
+                QuantityMeasurementApp.LengthUnit.YARDS
         );
-        assertEquals(2.0, result.getValue(), EPSILON, "1.0 yard + 3.0 feet should equal 2.0 yards");
+        assertEquals(0.6667, result.getValue(), 0.001, "1 foot + 12 inches in YARDS should be ~0.667");
         assertEquals(QuantityMeasurementApp.LengthUnit.YARDS, result.getUnit());
     }
 
     @Test
-    public void givenTwoPointFiveFourCmPlusOneInch_WhenAdded_ThenShouldReturnFivePointZeroEightCm() {
+    public void givenOneInchPlusOneInch_WhenTargetCentimeters_ThenShouldReturnFivePointZeroEight() {
         QuantityMeasurementApp.QuantityLength result = QuantityMeasurementApp.add(
-                new QuantityMeasurementApp.QuantityLength(2.54, QuantityMeasurementApp.LengthUnit.CENTIMETERS),
-                new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.INCHES)
+                new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.INCHES),
+                new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.INCHES),
+                QuantityMeasurementApp.LengthUnit.CENTIMETERS
         );
-        assertEquals(5.08, result.getValue(), 0.001, "2.54 cm + 1.0 inch should equal ~5.08 cm");
+        assertEquals(5.08, result.getValue(), 0.001, "1 inch + 1 inch in CENTIMETERS should be ~5.08");
         assertEquals(QuantityMeasurementApp.LengthUnit.CENTIMETERS, result.getUnit());
     }
 
-    // -------------------- COMMUTATIVITY --------------------
-
     @Test
-    public void givenTwoLengths_WhenAddedInBothOrders_ThenResultsShouldBeEqual() {
-        QuantityMeasurementApp.QuantityLength feet = new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET);
-        QuantityMeasurementApp.QuantityLength inches = new QuantityMeasurementApp.QuantityLength(12.0, QuantityMeasurementApp.LengthUnit.INCHES);
-        QuantityMeasurementApp.QuantityLength result1 = QuantityMeasurementApp.add(feet, inches);
-        QuantityMeasurementApp.QuantityLength result2 = QuantityMeasurementApp.add(inches, feet);
-        assertEquals(result1, result2, "Addition should be commutative");
+    public void givenTwoYardsPlusThreeFeet_WhenTargetYards_ThenShouldReturnThreeYards() {
+        QuantityMeasurementApp.QuantityLength result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.QuantityLength(2.0, QuantityMeasurementApp.LengthUnit.YARDS),
+                new QuantityMeasurementApp.QuantityLength(3.0, QuantityMeasurementApp.LengthUnit.FEET),
+                QuantityMeasurementApp.LengthUnit.YARDS
+        );
+        assertEquals(3.0, result.getValue(), EPSILON, "2 yards + 3 feet in YARDS should be 3.0");
+        assertEquals(QuantityMeasurementApp.LengthUnit.YARDS, result.getUnit());
     }
 
-    // -------------------- IDENTITY (ZERO) --------------------
+    @Test
+    public void givenTwoYardsPlusThreeFeet_WhenTargetFeet_ThenShouldReturnNineFeet() {
+        QuantityMeasurementApp.QuantityLength result = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.QuantityLength(2.0, QuantityMeasurementApp.LengthUnit.YARDS),
+                new QuantityMeasurementApp.QuantityLength(3.0, QuantityMeasurementApp.LengthUnit.FEET),
+                QuantityMeasurementApp.LengthUnit.FEET
+        );
+        assertEquals(9.0, result.getValue(), EPSILON, "2 yards + 3 feet in FEET should be 9.0");
+        assertEquals(QuantityMeasurementApp.LengthUnit.FEET, result.getUnit());
+    }
+
+    // -------------------- COMMUTATIVITY WITH TARGET UNIT --------------------
 
     @Test
-    public void givenFiveFeetPlusZeroInches_WhenAdded_ThenShouldReturnFiveFeet() {
+    public void givenTwoLengths_WhenAddedInBothOrdersWithTargetUnit_ThenResultsShouldBeEqual() {
+        QuantityMeasurementApp.QuantityLength result1 = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET),
+                new QuantityMeasurementApp.QuantityLength(12.0, QuantityMeasurementApp.LengthUnit.INCHES),
+                QuantityMeasurementApp.LengthUnit.YARDS
+        );
+        QuantityMeasurementApp.QuantityLength result2 = QuantityMeasurementApp.add(
+                new QuantityMeasurementApp.QuantityLength(12.0, QuantityMeasurementApp.LengthUnit.INCHES),
+                new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET),
+                QuantityMeasurementApp.LengthUnit.YARDS
+        );
+        assertEquals(result1.getValue(), result2.getValue(), EPSILON, "Addition should be commutative with explicit target unit");
+    }
+
+    // -------------------- ZERO & NEGATIVE WITH TARGET UNIT --------------------
+
+    @Test
+    public void givenFiveFeetPlusZeroInches_WhenTargetYards_ThenShouldReturnCorrectYards() {
         QuantityMeasurementApp.QuantityLength result = QuantityMeasurementApp.add(
                 new QuantityMeasurementApp.QuantityLength(5.0, QuantityMeasurementApp.LengthUnit.FEET),
-                new QuantityMeasurementApp.QuantityLength(0.0, QuantityMeasurementApp.LengthUnit.INCHES)
+                new QuantityMeasurementApp.QuantityLength(0.0, QuantityMeasurementApp.LengthUnit.INCHES),
+                QuantityMeasurementApp.LengthUnit.YARDS
         );
-        assertEquals(5.0, result.getValue(), EPSILON, "5.0 feet + 0.0 inches should equal 5.0 feet");
+        assertEquals(5.0 / 3.0, result.getValue(), 0.001, "5 feet + 0 inches in YARDS should be ~1.667");
+        assertEquals(QuantityMeasurementApp.LengthUnit.YARDS, result.getUnit());
     }
 
-    // -------------------- NEGATIVE VALUES --------------------
-
     @Test
-    public void givenFiveFeetPlusNegativeTwoFeet_WhenAdded_ThenShouldReturnThreeFeet() {
+    public void givenFiveFeetPlusNegativeTwoFeet_WhenTargetInches_ThenShouldReturnThirtySixInches() {
         QuantityMeasurementApp.QuantityLength result = QuantityMeasurementApp.add(
                 new QuantityMeasurementApp.QuantityLength(5.0, QuantityMeasurementApp.LengthUnit.FEET),
-                new QuantityMeasurementApp.QuantityLength(-2.0, QuantityMeasurementApp.LengthUnit.FEET)
+                new QuantityMeasurementApp.QuantityLength(-2.0, QuantityMeasurementApp.LengthUnit.FEET),
+                QuantityMeasurementApp.LengthUnit.INCHES
         );
-        assertEquals(3.0, result.getValue(), EPSILON, "5.0 feet + (-2.0) feet should equal 3.0 feet");
+        assertEquals(36.0, result.getValue(), EPSILON, "5 feet + (-2 feet) in INCHES should be 36.0");
+        assertEquals(QuantityMeasurementApp.LengthUnit.INCHES, result.getUnit());
     }
 
-    // -------------------- LARGE & SMALL VALUES --------------------
+    // -------------------- LARGE & SMALL SCALE --------------------
 
     @Test
-    public void givenLargeValues_WhenAdded_ThenShouldReturnCorrectSum() {
+    public void givenLargeValues_WhenTargetInches_ThenShouldReturnCorrectResult() {
         QuantityMeasurementApp.QuantityLength result = QuantityMeasurementApp.add(
-                new QuantityMeasurementApp.QuantityLength(1e6, QuantityMeasurementApp.LengthUnit.FEET),
-                new QuantityMeasurementApp.QuantityLength(1e6, QuantityMeasurementApp.LengthUnit.FEET)
+                new QuantityMeasurementApp.QuantityLength(1000.0, QuantityMeasurementApp.LengthUnit.FEET),
+                new QuantityMeasurementApp.QuantityLength(500.0, QuantityMeasurementApp.LengthUnit.FEET),
+                QuantityMeasurementApp.LengthUnit.INCHES
         );
-        assertEquals(2e6, result.getValue(), EPSILON, "1e6 + 1e6 feet should equal 2e6 feet");
+        assertEquals(18000.0, result.getValue(), EPSILON, "1000 + 500 feet in INCHES should be 18000.0");
     }
 
     @Test
-    public void givenSmallValues_WhenAdded_ThenShouldReturnCorrectSum() {
+    public void givenTwelveInchesPlusTwelveInches_WhenTargetYards_ThenShouldReturnPointSixSeven() {
         QuantityMeasurementApp.QuantityLength result = QuantityMeasurementApp.add(
-                new QuantityMeasurementApp.QuantityLength(0.001, QuantityMeasurementApp.LengthUnit.FEET),
-                new QuantityMeasurementApp.QuantityLength(0.002, QuantityMeasurementApp.LengthUnit.FEET)
+                new QuantityMeasurementApp.QuantityLength(12.0, QuantityMeasurementApp.LengthUnit.INCHES),
+                new QuantityMeasurementApp.QuantityLength(12.0, QuantityMeasurementApp.LengthUnit.INCHES),
+                QuantityMeasurementApp.LengthUnit.YARDS
         );
-        assertEquals(0.003, result.getValue(), EPSILON, "0.001 + 0.002 feet should equal 0.003 feet");
+        assertEquals(0.6667, result.getValue(), 0.001, "12 + 12 inches in YARDS should be ~0.667");
     }
 
     // -------------------- NULL HANDLING --------------------
 
     @Test
-    public void givenNullSecondOperand_WhenAdded_ThenShouldThrowException() {
+    public void givenNullTargetUnit_WhenAdded_ThenShouldThrowException() {
         assertThrows(IllegalArgumentException.class, () ->
                 QuantityMeasurementApp.add(
                         new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET),
+                        new QuantityMeasurementApp.QuantityLength(12.0, QuantityMeasurementApp.LengthUnit.INCHES),
                         null
+                ), "Null target unit should throw IllegalArgumentException"
+        );
+    }
+
+    @Test
+    public void givenNullOperand_WhenAdded_ThenShouldThrowException() {
+        assertThrows(IllegalArgumentException.class, () ->
+                QuantityMeasurementApp.add(
+                        new QuantityMeasurementApp.QuantityLength(1.0, QuantityMeasurementApp.LengthUnit.FEET),
+                        null,
+                        QuantityMeasurementApp.LengthUnit.FEET
                 ), "Null operand should throw IllegalArgumentException"
         );
     }

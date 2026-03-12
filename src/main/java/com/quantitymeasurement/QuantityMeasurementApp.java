@@ -44,14 +44,29 @@ public class QuantityMeasurementApp {
         }
 
         /**
-         * Adds another QuantityLength to this one.
-         * Result is expressed in the unit of this (first) operand.
+         * Private utility method - core addition logic reused by both add() overloads.
+         * Converts both values to base, sums them, converts to targetUnit.
+         */
+        private QuantityLength addWithTargetUnit(QuantityLength other, LengthUnit targetUnit) {
+            if (other == null) throw new IllegalArgumentException("Operand cannot be null");
+            if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
+            double sumInBase = this.toBaseUnit() + other.toBaseUnit();
+            double resultValue = sumInBase / targetUnit.getConversionFactor();
+            return new QuantityLength(resultValue, targetUnit);
+        }
+
+        /**
+         * UC6 - Add, result in unit of first operand (this).
          */
         public QuantityLength add(QuantityLength other) {
-            if (other == null) throw new IllegalArgumentException("Operand cannot be null");
-            double sumInBase = this.toBaseUnit() + other.toBaseUnit();
-            double resultValue = sumInBase / this.unit.getConversionFactor();
-            return new QuantityLength(resultValue, this.unit);
+            return addWithTargetUnit(other, this.unit);
+        }
+
+        /**
+         * UC7 - Add, result in explicitly specified target unit.
+         */
+        public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
+            return addWithTargetUnit(other, targetUnit);
         }
 
         public double getValue() {
@@ -81,9 +96,7 @@ public class QuantityMeasurementApp {
         }
     }
 
-    /**
-     * Static conversion API.
-     */
+    // Static conversion API
     public static double convert(double value, LengthUnit sourceUnit, LengthUnit targetUnit) {
         if (sourceUnit == null || targetUnit == null)
             throw new IllegalArgumentException("Source and target units cannot be null");
@@ -93,8 +106,7 @@ public class QuantityMeasurementApp {
     }
 
     /**
-     * Static addition API - overload 1: accepts two QuantityLength objects.
-     * Result is in unit of first operand.
+     * UC6 Static add - result in unit of first operand.
      */
     public static QuantityLength add(QuantityLength length1, QuantityLength length2) {
         if (length1 == null || length2 == null)
@@ -103,14 +115,14 @@ public class QuantityMeasurementApp {
     }
 
     /**
-     * Static addition API - overload 2: accepts raw values and units.
-     * Result is in unit of first operand.
+     * UC7 Static add - result in explicitly specified target unit.
      */
-    public static QuantityLength add(double value1, LengthUnit unit1,
-                                     double value2, LengthUnit unit2) {
-        QuantityLength l1 = new QuantityLength(value1, unit1);
-        QuantityLength l2 = new QuantityLength(value2, unit2);
-        return l1.add(l2);
+    public static QuantityLength add(QuantityLength length1, QuantityLength length2, LengthUnit targetUnit) {
+        if (length1 == null || length2 == null)
+            throw new IllegalArgumentException("Operands cannot be null");
+        if (targetUnit == null)
+            throw new IllegalArgumentException("Target unit cannot be null");
+        return length1.add(length2, targetUnit);
     }
 
     public static void demonstrateLengthConversion(double value, LengthUnit fromUnit, LengthUnit toUnit) {
@@ -136,11 +148,14 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        System.out.println("--- Addition Examples ---");
-        System.out.println(add(new QuantityLength(1.0, LengthUnit.FEET), new QuantityLength(2.0, LengthUnit.FEET)));
-        System.out.println(add(new QuantityLength(1.0, LengthUnit.FEET), new QuantityLength(12.0, LengthUnit.INCHES)));
-        System.out.println(add(new QuantityLength(12.0, LengthUnit.INCHES), new QuantityLength(1.0, LengthUnit.FEET)));
-        System.out.println(add(new QuantityLength(1.0, LengthUnit.YARDS), new QuantityLength(3.0, LengthUnit.FEET)));
-        System.out.println(add(new QuantityLength(2.54, LengthUnit.CENTIMETERS), new QuantityLength(1.0, LengthUnit.INCHES)));
+        System.out.println("--- UC7 Addition with Explicit Target Unit ---");
+        System.out.println(add(new QuantityLength(1.0, LengthUnit.FEET),
+                new QuantityLength(12.0, LengthUnit.INCHES), LengthUnit.FEET));
+        System.out.println(add(new QuantityLength(1.0, LengthUnit.FEET),
+                new QuantityLength(12.0, LengthUnit.INCHES), LengthUnit.INCHES));
+        System.out.println(add(new QuantityLength(1.0, LengthUnit.FEET),
+                new QuantityLength(12.0, LengthUnit.INCHES), LengthUnit.YARDS));
+        System.out.println(add(new QuantityLength(5.0, LengthUnit.FEET),
+                new QuantityLength(-2.0, LengthUnit.FEET), LengthUnit.INCHES));
     }
 }
