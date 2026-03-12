@@ -2,10 +2,11 @@ package com.quantitymeasurement;
 
 public class QuantityMeasurementApp {
 
-    // LengthUnit Enum - defines all supported units with conversion factors to base unit (feet)
     public enum LengthUnit {
         FEET(1.0),
-        INCHES(1.0 / 12.0);
+        INCHES(1.0 / 12.0),
+        YARDS(3.0),
+        CENTIMETERS(0.393701 / 12.0);
 
         private final double conversionFactor;
 
@@ -18,7 +19,6 @@ public class QuantityMeasurementApp {
         }
     }
 
-    // Single Generic QuantityLength class - replaces separate Feet and Inches classes
     public static class QuantityLength {
         private final double value;
         private final LengthUnit unit;
@@ -28,7 +28,6 @@ public class QuantityMeasurementApp {
             this.unit = unit;
         }
 
-        // Convert to base unit (feet) for comparison
         private double toBaseUnit() {
             return this.value * this.unit.getConversionFactor();
         }
@@ -48,12 +47,16 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        QuantityLength oneFoot = new QuantityLength(1.0, LengthUnit.FEET);
-        QuantityLength twelveInches = new QuantityLength(12.0, LengthUnit.INCHES);
-        System.out.println("1.0 feet == 12.0 inches: " + oneFoot.equals(twelveInches));
+        QuantityLength oneYard = new QuantityLength(1.0, LengthUnit.YARDS);
+        QuantityLength threeFeet = new QuantityLength(3.0, LengthUnit.FEET);
+        System.out.println("1.0 yard == 3.0 feet: " + oneYard.equals(threeFeet));
 
-        QuantityLength oneInch1 = new QuantityLength(1.0, LengthUnit.INCHES);
-        QuantityLength oneInch2 = new QuantityLength(1.0, LengthUnit.INCHES);
-        System.out.println("1.0 inch == 1.0 inch: " + oneInch1.equals(oneInch2));
+        QuantityLength oneYard2 = new QuantityLength(1.0, LengthUnit.YARDS);
+        QuantityLength thirtySixInches = new QuantityLength(36.0, LengthUnit.INCHES);
+        System.out.println("1.0 yard == 36.0 inches: " + oneYard2.equals(thirtySixInches));
+
+        QuantityLength oneCm = new QuantityLength(1.0, LengthUnit.CENTIMETERS);
+        QuantityLength cmInInches = new QuantityLength(0.393701, LengthUnit.INCHES);
+        System.out.println("1.0 cm == 0.393701 inches: " + oneCm.equals(cmInInches));
     }
 }
