@@ -1,15 +1,9 @@
 package com.quantitymeasurement;
 
-/**
- * QuantityMeasurementApp - main application class.
- * QuantityLength delegates all conversion logic to LengthUnit (SRP).
- */
 public class QuantityMeasurementApp {
 
-    /**
-     * Immutable length measurement.
-     * Delegates all conversion to LengthUnit methods.
-     */
+    // ==================== LENGTH SECTION (UC1-UC8) ====================
+
     public static class QuantityLength {
         private final double value;
         private final LengthUnit unit;
@@ -21,16 +15,10 @@ public class QuantityMeasurementApp {
             this.unit = unit;
         }
 
-        /**
-         * Delegates to LengthUnit for base unit conversion.
-         */
         private double toBaseUnit() {
             return unit.convertToBaseUnit(value);
         }
 
-        /**
-         * Converts this measurement to the target unit.
-         */
         public QuantityLength convertTo(LengthUnit targetUnit) {
             if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
             double baseValue = unit.convertToBaseUnit(value);
@@ -38,9 +26,6 @@ public class QuantityMeasurementApp {
             return new QuantityLength(convertedValue, targetUnit);
         }
 
-        /**
-         * Private utility - core addition logic for both add() overloads.
-         */
         private QuantityLength addWithTargetUnit(QuantityLength other, LengthUnit targetUnit) {
             if (other == null) throw new IllegalArgumentException("Operand cannot be null");
             if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
@@ -49,27 +34,16 @@ public class QuantityMeasurementApp {
             return new QuantityLength(resultValue, targetUnit);
         }
 
-        /**
-         * UC6 - Add, result in unit of first operand.
-         */
         public QuantityLength add(QuantityLength other) {
             return addWithTargetUnit(other, this.unit);
         }
 
-        /**
-         * UC7 - Add, result in explicitly specified target unit.
-         */
         public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
             return addWithTargetUnit(other, targetUnit);
         }
 
-        public double getValue() {
-            return value;
-        }
-
-        public LengthUnit getUnit() {
-            return unit;
-        }
+        public double getValue() { return value; }
+        public LengthUnit getUnit() { return unit; }
 
         @Override
         public boolean equals(Object obj) {
@@ -80,17 +54,13 @@ public class QuantityMeasurementApp {
         }
 
         @Override
-        public int hashCode() {
-            return Double.hashCode(toBaseUnit());
-        }
+        public int hashCode() { return Double.hashCode(toBaseUnit()); }
 
         @Override
-        public String toString() {
-            return value + " " + unit.name();
-        }
+        public String toString() { return value + " " + unit.name(); }
     }
 
-    // Static conversion API
+    // Static length API
     public static double convert(double value, LengthUnit sourceUnit, LengthUnit targetUnit) {
         if (sourceUnit == null || targetUnit == null)
             throw new IllegalArgumentException("Source and target units cannot be null");
@@ -99,25 +69,41 @@ public class QuantityMeasurementApp {
         return new QuantityLength(value, sourceUnit).convertTo(targetUnit).getValue();
     }
 
-    // Static add - UC6 style (result in unit of first operand)
-    public static QuantityLength add(QuantityLength length1, QuantityLength length2) {
-        if (length1 == null || length2 == null)
-            throw new IllegalArgumentException("Operands cannot be null");
-        return length1.add(length2);
+    public static QuantityLength add(QuantityLength l1, QuantityLength l2) {
+        if (l1 == null || l2 == null) throw new IllegalArgumentException("Operands cannot be null");
+        return l1.add(l2);
     }
 
-    // Static add - UC7 style (explicit target unit)
-    public static QuantityLength add(QuantityLength length1, QuantityLength length2, LengthUnit targetUnit) {
-        if (length1 == null || length2 == null)
-            throw new IllegalArgumentException("Operands cannot be null");
-        if (targetUnit == null)
-            throw new IllegalArgumentException("Target unit cannot be null");
-        return length1.add(length2, targetUnit);
+    public static QuantityLength add(QuantityLength l1, QuantityLength l2, LengthUnit targetUnit) {
+        if (l1 == null || l2 == null) throw new IllegalArgumentException("Operands cannot be null");
+        if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
+        return l1.add(l2, targetUnit);
+    }
+
+    // ==================== WEIGHT SECTION (UC9) ====================
+
+    public static double convert(double value, WeightUnit sourceUnit, WeightUnit targetUnit) {
+        if (sourceUnit == null || targetUnit == null)
+            throw new IllegalArgumentException("Source and target units cannot be null");
+        if (!Double.isFinite(value))
+            throw new IllegalArgumentException("Value must be a finite number");
+        return new QuantityWeight(value, sourceUnit).convertTo(targetUnit).getValue();
+    }
+
+    public static QuantityWeight add(QuantityWeight w1, QuantityWeight w2) {
+        if (w1 == null || w2 == null) throw new IllegalArgumentException("Operands cannot be null");
+        return w1.add(w2);
+    }
+
+    public static QuantityWeight add(QuantityWeight w1, QuantityWeight w2, WeightUnit targetUnit) {
+        if (w1 == null || w2 == null) throw new IllegalArgumentException("Operands cannot be null");
+        if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
+        return w1.add(w2, targetUnit);
     }
 
     public static void demonstrateLengthConversion(double value, LengthUnit fromUnit, LengthUnit toUnit) {
-        double result = convert(value, fromUnit, toUnit);
-        System.out.printf("convert(%.4f %s -> %s) = %.4f%n", value, fromUnit, toUnit, result);
+        System.out.printf("convert(%.4f %s -> %s) = %.4f%n",
+                value, fromUnit, toUnit, convert(value, fromUnit, toUnit));
     }
 
     public static void demonstrateLengthConversion(QuantityLength quantity, LengthUnit toUnit) {
@@ -129,19 +115,15 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        System.out.println("--- UC8 Refactored Design ---");
+        System.out.println("--- Length (UC1-UC8) ---");
         demonstrateLengthConversion(1.0, LengthUnit.FEET, LengthUnit.INCHES);
-        demonstrateLengthConversion(new QuantityLength(1.0, LengthUnit.YARDS), LengthUnit.FEET);
-        demonstrateLengthEquality(
-                new QuantityLength(1.0, LengthUnit.FEET),
-                new QuantityLength(12.0, LengthUnit.INCHES)
-        );
-        System.out.println(add(
-                new QuantityLength(1.0, LengthUnit.FEET),
-                new QuantityLength(12.0, LengthUnit.INCHES),
-                LengthUnit.YARDS
-        ));
-        System.out.println("INCHES.convertToBaseUnit(12.0) = " + LengthUnit.INCHES.convertToBaseUnit(12.0));
-        System.out.println("INCHES.convertFromBaseUnit(1.0) = " + LengthUnit.INCHES.convertFromBaseUnit(1.0));
+
+        System.out.println("--- Weight (UC9) ---");
+        QuantityWeight kg = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight grams = new QuantityWeight(1000.0, WeightUnit.GRAM);
+        System.out.println("1 kg == 1000 g: " + kg.equals(grams));
+        System.out.println("1 kg convertTo GRAM: " + kg.convertTo(WeightUnit.GRAM));
+        System.out.println("1 kg + 1000 g: " + add(kg, grams));
+        System.out.println("1 kg + 1000 g in GRAM: " + add(kg, grams, WeightUnit.GRAM));
     }
 }
