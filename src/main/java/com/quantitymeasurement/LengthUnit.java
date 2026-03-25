@@ -1,11 +1,10 @@
 package com.quantitymeasurement;
 
 /**
- * Standalone LengthUnit enum.
- * Single Responsibility: manages all unit conversion logic for length measurements.
- * Base unit is FEET.
+ * LengthUnit enum - implements IMeasurable.
+ * Base unit: FEET.
  */
-public enum LengthUnit {
+public enum LengthUnit implements IMeasurable {
     FEET(1.0),
     INCHES(1.0 / 12.0),
     YARDS(3.0),
@@ -17,21 +16,23 @@ public enum LengthUnit {
         this.conversionFactor = conversionFactor;
     }
 
+    @Override
     public double getConversionFactor() {
         return conversionFactor;
     }
 
-    /**
-     * Converts a value in this unit to the base unit (feet).
-     */
+    @Override
     public double convertToBaseUnit(double value) {
         return value * conversionFactor;
     }
 
-    /**
-     * Converts a value from the base unit (feet) to this unit.
-     */
+    @Override
     public double convertFromBaseUnit(double baseValue) {
         return baseValue / conversionFactor;
+    }
+
+    @Override
+    public String getUnitName() {
+        return this.name();
     }
 }
