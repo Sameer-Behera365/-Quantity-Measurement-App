@@ -3,21 +3,14 @@ package com.quantitymeasurement;
 /**
  * QuantityMeasurementApp - simplified orchestration class.
  * Generic methods handle all measurement categories uniformly.
- * No category-specific duplication.
  */
 public class QuantityMeasurementApp {
 
-    /**
-     * Generic equality demonstration - works for any IMeasurable unit.
-     */
     public static <U extends IMeasurable> void demonstrateEquality(
             Quantity<U> q1, Quantity<U> q2) {
         System.out.printf("equals(%s, %s) = %b%n", q1, q2, q1.equals(q2));
     }
 
-    /**
-     * Generic conversion demonstration - works for any IMeasurable unit.
-     */
     public static <U extends IMeasurable> void demonstrateConversion(
             Quantity<U> quantity, U targetUnit) {
         Quantity<U> result = quantity.convertTo(targetUnit);
@@ -25,9 +18,6 @@ public class QuantityMeasurementApp {
                 quantity, targetUnit.getUnitName(), result);
     }
 
-    /**
-     * Generic addition demonstration - works for any IMeasurable unit.
-     */
     public static <U extends IMeasurable> void demonstrateAddition(
             Quantity<U> q1, Quantity<U> q2, U targetUnit) {
         Quantity<U> result = q1.add(q2, targetUnit);
@@ -50,9 +40,17 @@ public class QuantityMeasurementApp {
         demonstrateConversion(oneKg, WeightUnit.GRAM);
         demonstrateAddition(oneKg, thousandGrams, WeightUnit.KILOGRAM);
 
+        System.out.println("--- Volume Operations (UC11) ---");
+        Quantity<VolumeUnit> oneLitre = new Quantity<>(1.0, VolumeUnit.LITRE);
+        Quantity<VolumeUnit> thousandMl = new Quantity<>(1000.0, VolumeUnit.MILLILITRE);
+        Quantity<VolumeUnit> oneGallon = new Quantity<>(1.0, VolumeUnit.GALLON);
+        demonstrateEquality(oneLitre, thousandMl);
+        demonstrateConversion(oneLitre, VolumeUnit.MILLILITRE);
+        demonstrateAddition(oneLitre, thousandMl, VolumeUnit.LITRE);
+        demonstrateAddition(oneLitre, oneGallon, VolumeUnit.MILLILITRE);
+
         System.out.println("--- Cross-Category Prevention ---");
-        Quantity<LengthUnit> lengthQ = new Quantity<>(1.0, LengthUnit.FEET);
-        Quantity<WeightUnit> weightQ = new Quantity<>(1.0, WeightUnit.KILOGRAM);
-        System.out.println("1 foot == 1 kg: " + lengthQ.equals(weightQ));
+        System.out.println("1 litre == 1 foot: " + oneLitre.equals(oneFoot));
+        System.out.println("1 litre == 1 kg: " + oneLitre.equals(oneKg));
     }
 }
