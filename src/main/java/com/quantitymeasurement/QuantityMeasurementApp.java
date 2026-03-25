@@ -25,32 +25,53 @@ public class QuantityMeasurementApp {
                 q1, q2, targetUnit.getUnitName(), result);
     }
 
+    public static <U extends IMeasurable> void demonstrateSubtraction(
+            Quantity<U> q1, Quantity<U> q2, U targetUnit) {
+        Quantity<U> result = q1.subtract(q2, targetUnit);
+        System.out.printf("subtract(%s, %s) in %s = %s%n",
+                q1, q2, targetUnit.getUnitName(), result);
+    }
+
+    public static <U extends IMeasurable> void demonstrateDivision(
+            Quantity<U> q1, Quantity<U> q2) {
+        double result = q1.divide(q2);
+        System.out.printf("divide(%s / %s) = %f%n", q1, q2, result);
+    }
+
     public static void main(String[] args) {
-        System.out.println("--- Length Operations (UC1-UC8) ---");
+        System.out.println("--- Length Operations ---");
         Quantity<LengthUnit> oneFoot = new Quantity<>(1.0, LengthUnit.FEET);
         Quantity<LengthUnit> twelveInches = new Quantity<>(12.0, LengthUnit.INCHES);
         demonstrateEquality(oneFoot, twelveInches);
         demonstrateConversion(oneFoot, LengthUnit.INCHES);
         demonstrateAddition(oneFoot, twelveInches, LengthUnit.FEET);
 
-        System.out.println("--- Weight Operations (UC9) ---");
-        Quantity<WeightUnit> oneKg = new Quantity<>(1.0, WeightUnit.KILOGRAM);
-        Quantity<WeightUnit> thousandGrams = new Quantity<>(1000.0, WeightUnit.GRAM);
-        demonstrateEquality(oneKg, thousandGrams);
-        demonstrateConversion(oneKg, WeightUnit.GRAM);
-        demonstrateAddition(oneKg, thousandGrams, WeightUnit.KILOGRAM);
+        System.out.println("--- Subtraction (UC12) ---");
+        demonstrateSubtraction(
+                new Quantity<>(10.0, LengthUnit.FEET),
+                new Quantity<>(6.0, LengthUnit.INCHES),
+                LengthUnit.FEET);
+        demonstrateSubtraction(
+                new Quantity<>(10.0, WeightUnit.KILOGRAM),
+                new Quantity<>(5000.0, WeightUnit.GRAM),
+                WeightUnit.KILOGRAM);
+        demonstrateSubtraction(
+                new Quantity<>(5.0, VolumeUnit.LITRE),
+                new Quantity<>(500.0, VolumeUnit.MILLILITRE),
+                VolumeUnit.LITRE);
 
-        System.out.println("--- Volume Operations (UC11) ---");
-        Quantity<VolumeUnit> oneLitre = new Quantity<>(1.0, VolumeUnit.LITRE);
-        Quantity<VolumeUnit> thousandMl = new Quantity<>(1000.0, VolumeUnit.MILLILITRE);
-        Quantity<VolumeUnit> oneGallon = new Quantity<>(1.0, VolumeUnit.GALLON);
-        demonstrateEquality(oneLitre, thousandMl);
-        demonstrateConversion(oneLitre, VolumeUnit.MILLILITRE);
-        demonstrateAddition(oneLitre, thousandMl, VolumeUnit.LITRE);
-        demonstrateAddition(oneLitre, oneGallon, VolumeUnit.MILLILITRE);
-
-        System.out.println("--- Cross-Category Prevention ---");
-        System.out.println("1 litre == 1 foot: " + oneLitre.equals(oneFoot));
-        System.out.println("1 litre == 1 kg: " + oneLitre.equals(oneKg));
+        System.out.println("--- Division (UC12) ---");
+        demonstrateDivision(
+                new Quantity<>(10.0, LengthUnit.FEET),
+                new Quantity<>(2.0, LengthUnit.FEET));
+        demonstrateDivision(
+                new Quantity<>(24.0, LengthUnit.INCHES),
+                new Quantity<>(2.0, LengthUnit.FEET));
+        demonstrateDivision(
+                new Quantity<>(10.0, WeightUnit.KILOGRAM),
+                new Quantity<>(5.0, WeightUnit.KILOGRAM));
+        demonstrateDivision(
+                new Quantity<>(5.0, VolumeUnit.LITRE),
+                new Quantity<>(10.0, VolumeUnit.LITRE));
     }
 }

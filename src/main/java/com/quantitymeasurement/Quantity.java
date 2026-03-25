@@ -1,9 +1,8 @@
 package com.quantitymeasurement;
 
 /**
- * Generic Quantity class - replaces QuantityLength and QuantityWeight.
- * Works with any IMeasurable unit type.
- * Single Responsibility: handles value comparison, conversion, and addition.
+ * Generic Quantity class - handles equality, conversion, addition,
+ * subtraction and division for any IMeasurable unit type.
  */
 public class Quantity<U extends IMeasurable> {
     private static final double EPSILON = 1e-4;
@@ -17,17 +16,10 @@ public class Quantity<U extends IMeasurable> {
         this.unit = unit;
     }
 
-    /**
-     * Converts to base unit using the unit's conversion method.
-     */
     private double toBaseUnit() {
         return unit.convertToBaseUnit(value);
     }
 
-    /**
-     * Converts this quantity to the target unit.
-     * Returns a new Quantity instance (immutability).
-     */
     public Quantity<U> convertTo(U targetUnit) {
         if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
         double baseValue = unit.convertToBaseUnit(value);
@@ -35,9 +27,8 @@ public class Quantity<U extends IMeasurable> {
         return new Quantity<>(convertedValue, targetUnit);
     }
 
-    /**
-     * Private utility - core addition logic reused by both add() overloads.
-     */
+    // -------------------- ADDITION --------------------
+
     private Quantity<U> addWithTargetUnit(Quantity<U> other, U targetUnit) {
         if (other == null) throw new IllegalArgumentException("Operand cannot be null");
         if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
@@ -46,18 +37,57 @@ public class Quantity<U extends IMeasurable> {
         return new Quantity<>(resultValue, targetUnit);
     }
 
-    /**
-     * Add - result in unit of first operand.
-     */
     public Quantity<U> add(Quantity<U> other) {
         return addWithTargetUnit(other, this.unit);
     }
 
-    /**
-     * Add - result in explicitly specified target unit.
-     */
     public Quantity<U> add(Quantity<U> other, U targetUnit) {
         return addWithTargetUnit(other, targetUnit);
+    }
+
+    // -------------------- SUBTRACTION --------------------
+
+    /**
+     * Private utility - core subtraction logic reused by both subtract() overloads.
+     */
+    private Quantity<U> subtractWithTargetUnit(Quantity<U> other, U targetUnit) {
+        if (other == null) throw new IllegalArgumentException("Operand cannot be null");
+        if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
+        if (!this.unit.getClass().equals(other.unit.getClass()))
+            throw new IllegalArgumentException("Cannot subtract different measurement categories");
+        double differenceInBase = this.toBaseUnit() - other.toBaseUnit();
+        double resultValue = targetUnit.convertFromBaseUnit(differenceInBase);
+        return new Quantity<>(resultValue, targetUnit);
+    }
+
+    /**
+     * Subtract - result in unit of first operand (implicit).
+     */
+    public Quantity<U> subtract(Quantity<U> other) {
+        return subtractWithTargetUnit(other, this.unit);
+    }
+
+    /**
+     * Subtract - result in explicitly specified target unit.
+     */
+    public Quantity<U> subtract(Quantity<U> other, U targetUnit) {
+        return subtractWithTargetUnit(other, targetUnit);
+    }
+
+    // -------------------- DIVISION --------------------
+
+    /**
+     * Divide this quantity by another - returns dimensionless scalar.
+     * Throws ArithmeticException if divisor is zero.
+     */
+    public double divide(Quantity<U> other) {
+        if (other == null) throw new IllegalArgumentException("Operand cannot be null");
+        if (!this.unit.getClass().equals(other.unit.getClass()))
+            throw new IllegalArgumentException("Cannot divide different measurement categories");
+        double otherBase = other.toBaseUnit();
+        if (Double.compare(otherBase, 0.0) == 0)
+            throw new ArithmeticException("Division by zero is not allowed");
+        return this.toBaseUnit() / otherBase;
     }
 
     public double getValue() { return value; }
@@ -68,7 +98,6 @@ public class Quantity<U extends IMeasurable> {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Quantity<?> other = (Quantity<?>) obj;
-        // Cross-category prevention - unit class must match
         if (!this.unit.getClass().equals(other.unit.getClass())) return false;
         return Math.abs(this.toBaseUnit() - other.toBaseUnit()) < EPSILON;
     }
